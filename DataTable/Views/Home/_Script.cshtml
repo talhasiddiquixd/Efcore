@@ -1,0 +1,119 @@
+﻿<script>
+    var Odata;
+    function LoadDataTable() {
+        Odata = $("#datatable_Grid").DataTable({
+            // Design Assets
+            responsive: true,
+            fixedHeader: true,
+            stateSave: false,
+            autoWidth: true,
+            // ServerSide Setups
+            processing: true,
+            serverSide: true,
+            // Paging Setups
+            paging: true,
+            //// Searching Setups
+            searching: { regex: true },
+            // Ajax Filter
+            ajax: {
+                url: "/Home/LoadTable",
+                type: "POST",
+                contentType: "application/json",
+                dataType: "json",
+                data: function (d) {
+                    
+                    d.StartDate = $("#txt_Filter_StartDate").val();
+                    d.EndDate = $("#txt_Filter_EndDate").val();
+                    d.searchBy = $("#gridSearch").val();
+                    d.Status = $("#dropdown_Filter_Status").val();
+                    return JSON.stringify(d);
+                }
+            },
+            //Columns Setups
+            columns: [
+               
+                {
+                    title: 'Name',
+                    data: "name"
+                },
+                {
+                    title: 'Phone Number',
+                    data: "phoneNumber1"
+                },
+                {
+                    title: 'Address',
+                    data: "address"
+                },
+                {
+                    title: 'Status',
+                    data: "isActive",
+                    sortable: false,
+                    render: data => `<label Id='lab' disabled >${data ? '<span class="badge badge-success">Active </span>' : '<span class="badge badge-danger">InActive </span>'}</label>`
+                },
+                {
+                    title: 'Created At',
+                    data: "createdAt"
+                },
+                {
+                    'title': "Actions",
+                    "orderable": false,
+                    "data": "action"
+                }
+            ],
+            // Column Definitions
+            columnDefs: [
+                //{ targets: [5], orderable: false },
+                { targets: "no-sort", orderable: false },
+                { targets: "no-search", searchable: false },
+                {
+                    targets: "trim",
+                    render: function (data, type, full, meta) {
+                        if (type === "display") {
+                            data = strtrunc(data, 10);
+                        }
+
+                        return data;
+                    }
+                },
+                { targets: "date-type", type: "date-eu" }
+            ],
+            "scrollX": false,
+            "scrollCollapse": false,
+            "order": [[3, "desc"]]
+
+        });
+    }
+    function ResetFilter() {
+        $("#dropdown_Filter_Status").val("").trigger('change');
+        FormReset("frm_Filter_Grid");
+        Odata.ajax.reload();
+    }
+    function ApplyFilter() {
+
+        Odata.ajax.reload();
+    }
+    function SearchGrid() {
+        Odata.ajax.reload();
+    }
+    function EditDetails(Id) {
+        window.location.href = "/Customers/Update?Id=" + Id;
+    }
+
+    function DeleteDetails(e) {
+
+        var id = e.dataset.id;
+        DeleteRecordSWL('/Customers/Delete?Id=' + id);
+    }
+    function ActionOpen(id) {
+        var ishow = $('#hiddenATag_' + id).hasClass('show');
+        $(".cls_ActionMenu").removeClass("show");
+        if (!ishow) {
+            $("#hiddenATag_" + id).addClass("show");
+            $("#hiddenDivTag_" + id).addClass("show");
+        }
+        else {
+            $("#hiddenATag_" + id).removeClass("show");
+            $("#hiddenDivTag_" + id).removeClass("show");
+        }
+    }
+</script>
